@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QRIS Payment</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background-color: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 500px;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .language-selector {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 20px;
+        }
+        
+        .lang-btn {
+            background: none;
+            border: 1px solid #ddd;
+            padding: 5px 10px;
+            margin-left: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .lang-btn.active {
+            background-color: #2575fc;
+            color: white;
+            border-color: #2575fc;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+        
+        .description {
+            color: #666;
+            margin-bottom: 25px;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+        
+        .amount {
+            font-size: 32px;
+            font-weight: bold;
+            color: #2575fc;
+            margin: 20px 0;
+        }
+        
+        .qris-container {
+            background-color: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            display: inline-block;
+        }
+        
+        .qris-image {
+            width: 250px;
+            height: 250px;
+            border-radius: 10px;
+            object-fit: cover;
+            border: 2px solid #dee2e6;
+        }
+        
+        .qris-placeholder {
+            width: 250px;
+            height: 250px;
+            background-color: #e9ecef;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto;
+            color: #6c757d;
+            font-weight: bold;
+            border: 2px dashed #adb5bd;
+            display: none;
+        }
+        
+        .amount-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        .amount-btn {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            padding: 12px 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+        
+        .amount-btn:hover {
+            background-color: #e9ecef;
+        }
+        
+        .amount-btn.active {
+            background-color: #2575fc;
+            color: white;
+            border-color: #2575fc;
+        }
+        
+        .custom-amount {
+            margin: 20px 0;
+        }
+        
+        .custom-amount input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            font-size: 16px;
+            text-align: center;
+        }
+        
+        .request-btn {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        .request-btn:hover {
+            background-color: #218838;
+        }
+        
+        .instructions {
+            background-color: #e7f3ff;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        
+        .instructions h3 {
+            color: #2575fc;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        
+        .instructions ol {
+            padding-left: 20px;
+            color: #495057;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+        
+        .payment-info {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .info-item {
+            text-align: center;
+        }
+        
+        .info-label {
+            font-size: 14px;
+            color: #6c757d;
+        }
+        
+        .info-value {
+            font-size: 16px;
+            font-weight: bold;
+            color: #495057;
+        }
+        
+        .footer {
+            margin-top: 20px;
+            color: #6c757d;
+            font-size: 14px;
+        }
+        
+        .download-btn {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 15px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background-color 0.3s;
+        }
+        
+        .download-btn:hover {
+            background-color: #5a6268;
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .qris-image, .qris-placeholder {
+                width: 200px;
+                height: 200px;
+            }
+            
+            .amount {
+                font-size: 28px;
+            }
+            
+            .amount-buttons {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="language-selector">
+            <button class="lang-btn" id="id-btn">ID</button>
+            <button class="lang-btn active" id="en-btn">EN</button>
+        </div>
+        
+        <h1 id="title">QRIS Payment</h1>
+        <p class="description" id="description">Select an amount and scan the QR code to make payment</p>
+        
+        <div class="amount" id="amount-display">Rp 0</div>
+        
+        <div class="qris-container">
+            <img src="https://files.catbox.moe/e6g7ij.jpg" alt="QRIS Code" class="qris-image" id="qris-image">
+            <div class="qris-placeholder" id="qris-placeholder">
+                QR Code will appear here after selecting amount
+            </div>
+            <button class="download-btn" onclick="downloadQRIS()">Download QR Code</button>
+        </div>
+        
+        <div class="amount-buttons" id="amount-buttons">
+            <!-- Amount buttons will be generated by JavaScript -->
+        </div>
+        
+        <div class="custom-amount">
+            <input type="number" id="custom-amount" placeholder="Enter custom amount (min: 1,000, max: 50,000)">
+        </div>
+        
+        <button class="request-btn" id="request-btn">Request Payment</button>
+        
+        <div class="instructions">
+            <h3 id="instructions-title">How to Pay:</h3>
+            <ol id="instructions-list">
+                <li>Open your e-wallet or mobile banking app</li>
+                <li>Select QRIS scan feature</li>
+                <li>Point your camera at the QR code above</li>
+                <li>Make sure the payment amount is correct</li>
+                <li>Confirm payment</li>
+            </ol>
+        </div>
+        
+        <div class="payment-info">
+            <div class="info-item">
+                <div class="info-label" id="status-label">Status</div>
+                <div class="info-value" id="status-value">Waiting</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label" id="time-label">Time</div>
+                <div class="info-value" id="time-value">--:--</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label" id="id-label">Transaction ID</div>
+                <div class="info-value" id="id-value">----</div>
+            </div>
+        </div>
+        
+        <div class="footer" id="footer">
+            Secure and encrypted payment with QRIS
+        </div>
+    </div>
+
+    <script>
+        // Language texts
+        const texts = {
+            en: {
+                title: "QRIS Payment",
+                description: "Select an amount and scan the QR code to make payment",
+                instructionsTitle: "How to Pay:",
+                instructions: [
+                    "Open your e-wallet or mobile banking app",
+                    "Select QRIS scan feature",
+                    "Point your camera at the QR code above",
+                    "Make sure the payment amount is correct",
+                    "Confirm payment"
+                ],
+                statusLabel: "Status",
+                timeLabel: "Time",
+                idLabel: "Transaction ID",
+                requestBtn: "Request Payment",
+                footer: "Secure and encrypted payment with QRIS",
+                customPlaceholder: "Enter custom amount (min: 1,000, max: 50,000)",
+                downloadBtn: "Download QR Code"
+            },
+            id: {
+                title: "Pembayaran QRIS",
+                description: "Pilih nominal dan scan kode QR untuk melakukan pembayaran",
+                instructionsTitle: "Cara Pembayaran:",
+                instructions: [
+                    "Buka aplikasi e-wallet atau mobile banking Anda",
+                    "Pilih fitur scan QRIS",
+                    "Arahkan kamera ke kode QR di atas",
+                    "Pastikan nominal pembayaran sudah sesuai",
+                    "Konfirmasi pembayaran"
+                ],
+                statusLabel: "Status",
+                timeLabel: "Waktu",
+                idLabel: "ID Transaksi",
+                requestBtn: "Minta Pembayaran",
+                footer: "Pembayaran aman dan terenkripsi dengan QRIS",
+                customPlaceholder: "Masukkan nominal kustom (min: 1.000, maks: 50.000)",
+                downloadBtn: "Download Kode QR"
+            }
+        };
+
+        // Default values
+        let currentLanguage = 'en';
+        let selectedAmount = 0;
+        let amounts = [1000, 5000, 10000, 20000, 30000, 50000];
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set current time
+            updateTime();
+            setInterval(updateTime, 1000);
+            
+            // Generate amount buttons
+            generateAmountButtons();
+            
+            // Set up event listeners
+            document.getElementById('id-btn').addEventListener('click', () => switchLanguage('id'));
+            document.getElementById('en-btn').addEventListener('click', () => switchLanguage('en'));
+            document.getElementById('request-btn').addEventListener('click', requestPayment);
+            document.getElementById('custom-amount').addEventListener('input', handleCustomAmount);
+            
+            // Generate transaction ID
+            generateTransactionId();
+        });
+
+        // Switch language
+        function switchLanguage(lang) {
+            currentLanguage = lang;
+            
+            // Update active language button
+            document.getElementById('id-btn').classList.toggle('active', lang === 'id');
+            document.getElementById('en-btn').classList.toggle('active', lang === 'en');
+            
+            // Update all texts
+            document.getElementById('title').textContent = texts[lang].title;
+            document.getElementById('description').textContent = texts[lang].description;
+            document.getElementById('instructions-title').textContent = texts[lang].instructionsTitle;
+            document.getElementById('request-btn').textContent = texts[lang].requestBtn;
+            document.getElementById('footer').textContent = texts[lang].footer;
+            document.getElementById('status-label').textContent = texts[lang].statusLabel;
+            document.getElementById('time-label').textContent = texts[lang].timeLabel;
+            document.getElementById('id-label').textContent = texts[lang].idLabel;
+            document.getElementById('custom-amount').placeholder = texts[lang].customPlaceholder;
+            document.querySelector('.download-btn').textContent = texts[lang].downloadBtn;
+            
+            // Update instructions list
+            const instructionsList = document.getElementById('instructions-list');
+            instructionsList.innerHTML = '';
+            texts[lang].instructions.forEach(instruction => {
+                const li = document.createElement('li');
+                li.textContent = instruction;
+                instructionsList.appendChild(li);
+            });
+        }
+
+        // Generate amount buttons
+        function generateAmountButtons() {
+            const container = document.getElementById('amount-buttons');
+            container.innerHTML = '';
+            
+            amounts.forEach(amount => {
+                const button = document.createElement('button');
+                button.className = 'amount-btn';
+                button.textContent = formatCurrency(amount);
+                button.addEventListener('click', () => selectAmount(amount, button));
+                container.appendChild(button);
+            });
+        }
+
+        // Select amount
+        function selectAmount(amount, button) {
+            selectedAmount = amount;
+            
+            // Update UI
+            document.querySelectorAll('.amount-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            button.classList.add('active');
+            
+            // Update amount display
+            document.getElementById('amount-display').textContent = formatCurrency(amount);
+            
+            // Reset custom amount input
+            document.getElementById('custom-amount').value = '';
+        }
+
+        // Handle custom amount input
+        function handleCustomAmount(event) {
+            const value = parseInt(event.target.value) || 0;
+            
+            if (value >= 1000 && value <= 50000) {
+                selectedAmount = value;
+                document.getElementById('amount-display').textContent = formatCurrency(value);
+                
+                // Remove active class from amount buttons
+                document.querySelectorAll('.amount-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+            } else if (value > 50000) {
+                alert(currentLanguage === 'en' 
+                    ? 'Maximum amount is 50,000' 
+                    : 'Maksimum nominal adalah 50.000');
+                event.target.value = 50000;
+                handleCustomAmount(event);
+            }
+        }
+
+        // Request payment
+        function requestPayment() {
+            if (selectedAmount === 0) {
+                alert(currentLanguage === 'en' 
+                    ? 'Please select an amount first' 
+                    : 'Silakan pilih nominal terlebih dahulu');
+                return;
+            }
+            
+            // In a real implementation, this would send a request to your backend
+            // For this demo, we'll just show a success message
+            document.getElementById('status-value').textContent = currentLanguage === 'en' ? 'Requested' : 'Diminta';
+            document.getElementById('status-value').style.color = '#28a745';
+            
+            alert(currentLanguage === 'en' 
+                ? `Payment request for ${formatCurrency(selectedAmount)} has been sent!` 
+                : `Permintaan pembayaran untuk ${formatCurrency(selectedAmount)} telah dikirim!`);
+        }
+
+        // Download QRIS image
+        function downloadQRIS() {
+            const link = document.createElement('a');
+            link.href = 'https://files.catbox.moe/e6g7ij.jpg';
+            link.download = 'qris-payment.jpg';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            alert(currentLanguage === 'en' 
+                ? 'QR code downloaded successfully!' 
+                : 'Kode QR berhasil diunduh!');
+        }
+
+        // Format currency
+        function formatCurrency(amount) {
+            return `Rp ${amount.toLocaleString('id-ID')}`;
+        }
+
+        // Update time
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-US', { 
+                hour12: false, 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+            document.getElementById('time-value').textContent = timeString;
+        }
+
+        // Generate transaction ID
+        function generateTransactionId() {
+            const id = 'QR' + Math.floor(100000 + Math.random() * 900000);
+            document.getElementById('id-value').textContent = id;
+        }
+    </script>
+</body>
+</html>
